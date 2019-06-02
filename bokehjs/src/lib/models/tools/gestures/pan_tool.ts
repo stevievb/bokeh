@@ -2,6 +2,7 @@ import {GestureTool, GestureToolView} from "./gesture_tool"
 import * as p from "core/properties"
 import {GestureEvent} from "core/ui_events"
 import {Dimensions} from "core/enums"
+import {RangeInfo} from "../../plots/plot_canvas"
 
 export class PanToolView extends GestureToolView {
   model: PanTool
@@ -12,12 +13,7 @@ export class PanToolView extends GestureToolView {
   protected v_axis_only: boolean
   protected h_axis_only: boolean
 
-  protected pan_info: {
-    xrs: {[key: string]: {start: number, end: number}}
-    yrs: {[key: string]: {start: number, end: number}}
-    sdx: number
-    sdy: number
-  }
+  protected range_info: RangeInfo & {sdx: number, sdy: number}
 
   _pan_start(ev: GestureEvent): void {
     this.last_dx = 0
@@ -48,8 +44,8 @@ export class PanToolView extends GestureToolView {
     this.h_axis_only = false
     this.v_axis_only = false
 
-    if (this.pan_info != null)
-      this.plot_view.push_state('pan', {range: this.pan_info})
+    if (this.range_info != null)
+      this.plot_view.push_state('pan', {range: this.range_info})
   }
 
   _update(dx: number, dy: number): void {
@@ -97,24 +93,10 @@ export class PanToolView extends GestureToolView {
     this.last_dx = dx
     this.last_dy = dy
 
-    const {xscales, yscales} = frame
-
-    const xrs: {[key: string]: {start: number, end: number}} = {}
-    for (const name in xscales) {
-      const scale = xscales[name]
-      const [start, end] = scale.r_invert(sx0, sx1)
-      xrs[name] = {start, end}
-    }
-
-    const yrs: {[key: string]: {start: number, end: number}} = {}
-    for (const name in yscales) {
-      const scale = yscales[name]
-      const [start, end] = scale.r_invert(sy0, sy1)
-      yrs[name] = {start, end}
-    }
-
-    this.pan_info = {xrs, yrs, sdx, sdy}
-    this.plot_view.update_range(this.pan_info, true)
+    const pan_info = {sxr: {sx0, sx1}, syr: {sy0, sy1}, sdx, sdy}
+    const range_info = this.plot_view.update_range_from_screen(pan_info, true)
+    if (range_info != null)
+      this.range_info = {...range_info, sdx, sdy}
   }
 }
 
