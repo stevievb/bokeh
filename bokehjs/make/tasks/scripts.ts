@@ -27,8 +27,9 @@ task("scripts:bundle", ["scripts:compile"], async () => {
     paths.lib.gl.main,
   ]
   const bases = [paths.build_dir.lib, './node_modules']
+  const ignores = ["crypto"]
 
-  const linker = new Linker({entries, bases})
+  const linker = new Linker({entries, bases, ignores})
   const bundles = linker.link()
 
   const [bokehjs, api, widgets, tables, gl] = bundles
