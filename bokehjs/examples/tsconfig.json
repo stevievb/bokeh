@@ -21,6 +21,7 @@
     "target": "ES5",
     "lib": ["es5", "dom", "es2015.core", "es2015.promise", "es2015.iterable"],
     "types": [],
+    "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
       "*": ["../build/js/lib/*", "../build/js/types/*"]
