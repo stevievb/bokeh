@@ -55,6 +55,10 @@ class AutoloadJsHandler(SessionHandler):
     ''' Implements a custom Tornado handler for the autoload JS chunk
 
     '''
+
+    def set_default_headers(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+
     @gen.coroutine
     def get(self, *args, **kwargs):
         session = yield self.get_session()
