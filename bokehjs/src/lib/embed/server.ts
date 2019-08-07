@@ -43,12 +43,12 @@ function _get_session(websocket_url: string, session_id: string, args_string: st
 
 // Fill element with the roots from session_id
 export function add_document_from_session(websocket_url: string, session_id: string, element: HTMLElement,
-    roots: {[key: string]: HTMLElement} = {}, use_for_title: boolean = false): Promise<{[key: string]: DOMView}> {
+    roots: {[key: string]: HTMLElement} = {}, use_for_title: boolean = false): Promise<{views: {[key: string]: DOMView}, session: ClientSession}> {
   const args_string = window.location.search.substr(1)
   const promise = _get_session(websocket_url, session_id, args_string)
   return promise.then(
     (session: ClientSession) => {
-      return add_document_standalone(session.document, element, roots, use_for_title)
+      return {views: add_document_standalone(session.document, element, roots, use_for_title), session: session}
     },
     (error) => {
       logger.error(`Failed to load Bokeh session ${session_id}: ${error}`)

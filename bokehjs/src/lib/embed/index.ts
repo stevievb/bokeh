@@ -8,6 +8,7 @@ import {DocsJson, RenderItem} from "./json"
 import {add_document_standalone} from "./standalone"
 import {add_document_from_session, _get_ws_url} from "./server"
 import {BOKEH_ROOT, _resolve_element, _resolve_root_elements} from "./dom"
+import { ClientSession } from 'client/session';
 
 export {DocsJson, RenderItem} from "./json"
 export {add_document_standalone, index} from "./standalone"
@@ -40,11 +41,12 @@ export function embed_item(item: JsonItem, target_id?: string) {
 // the first two args, whereas server provide the app_app, and *may* prove and
 // absolute_url as well if non-relative links are needed for resources. This function
 // should probably be split in to two pieces to reflect the different usage patterns
-export function embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): void {
-  defer(() => _embed_items(docs_json, render_items, app_path, absolute_url))
+export function embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): ClientSession[] {
+  //defer(() => _embed_items(docs_json, render_items, app_path, absolute_url))
+  return _embed_items(docs_json, render_items, app_path, absolute_url)
 }
 
-function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): void {
+function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): ClientSession[] {
   if (isString(docs_json))
     docs_json = JSON.parse(unescape(docs_json)) as DocsJson
 
@@ -54,6 +56,7 @@ function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], 
     docs[docid] = Document.from_json(doc_json)
   }
 
+  const sessions: ClientSession[] = []
   for (const item of render_items) {
     const element = _resolve_element(item)
     const roots = _resolve_root_elements(item)
@@ -66,8 +69,10 @@ function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], 
 
       const promise = add_document_from_session(websocket_url, item.sessionid, element, roots, item.use_for_title)
       promise.then(
-        () => {
+        (ref) => {
           console.log("Bokeh items were rendered successfully")
+          sessions.push(ref.session)
+
         },
         (error) => {
           console.log("Error rendering Bokeh items:", error)
@@ -76,4 +81,6 @@ function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], 
     } else
       throw new Error(`Error rendering Bokeh items: either 'docid' or 'sessionid' was expected.`)
   }
+
+  return sessions
 }
