@@ -11,7 +11,6 @@ export namespace CustomJSTransform {
     args: p.Property<{[key: string]: unknown}>
     func: p.Property<string>
     v_func: p.Property<string>
-    use_strict: p.Property<boolean>
   }
 }
 
@@ -24,12 +23,11 @@ export class CustomJSTransform extends Transform {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_CustomJSTransform(): void {
     this.define<CustomJSTransform.Props>({
       args:       [ p.Any,    {}     ], // TODO (bev) better type
       func:       [ p.String, ""     ],
       v_func:     [ p.String, ""     ],
-      use_strict: [ p.Boolean, false ],
     })
   }
 
@@ -42,8 +40,7 @@ export class CustomJSTransform extends Transform {
   }
 
   protected _make_transform(name: string, func: string): Function {
-    const code = this.use_strict ? use_strict(func) : func
-    return new Function(...this.names, name, "require", "exports", code)
+    return new Function(...this.names, name, "require", "exports", use_strict(func))
   }
 
   get scalar_transform(): Function {
@@ -62,4 +59,3 @@ export class CustomJSTransform extends Transform {
     return this.vector_transform(...this.values, xs, require, {})
   }
 }
-CustomJSTransform.initClass()

@@ -33,31 +33,31 @@ describe("lib.models.plots.plot", () => {
 
   describe("PlotView", () => {
 
-      it("should perform standard reset actions by default", () => {
-        const view = new_plot_view()
-        const spy_state = sinon.spy(view, 'clear_state')
-        const spy_range = sinon.spy(view, 'reset_range')
-        const spy_selection = sinon.spy(view, 'reset_selection')
-        const spy_event = sinon.spy(view.model, 'trigger_event')
-        view.reset()
-        expect(spy_state.called).to.be.true
-        expect(spy_range.called).to.be.true
-        expect(spy_selection.called).to.be.true
-        expect(spy_event.called).to.be.true
-      })
+    it("should perform standard reset actions by default", () => {
+      const view = new_plot_view()
+      const spy_state = sinon.spy(view, 'clear_state')
+      const spy_range = sinon.spy(view, 'reset_range')
+      const spy_selection = sinon.spy(view, 'reset_selection')
+      const spy_event = sinon.spy(view.model, 'trigger_event')
+      view.reset()
+      expect(spy_state.called).to.be.true
+      expect(spy_range.called).to.be.true
+      expect(spy_selection.called).to.be.true
+      expect(spy_event.called).to.be.true
+    })
 
-      it("should skip standard reset actions for event_only policy", () => {
-        const view = new_plot_view({reset_policy: "event_only"})
-        const spy_state = sinon.spy(view, 'clear_state')
-        const spy_range = sinon.spy(view, 'reset_range')
-        const spy_selection = sinon.spy(view, 'reset_selection')
-        const spy_event = sinon.spy(view.model, 'trigger_event')
-        view.reset()
-        expect(spy_state.called).to.be.false
-        expect(spy_range.called).to.be.false
-        expect(spy_selection.called).to.be.false
-        expect(spy_event.called).to.be.true
-      })
+    it("should skip standard reset actions for event_only policy", () => {
+      const view = new_plot_view({reset_policy: "event_only"})
+      const spy_state = sinon.spy(view, 'clear_state')
+      const spy_range = sinon.spy(view, 'reset_range')
+      const spy_selection = sinon.spy(view, 'reset_selection')
+      const spy_event = sinon.spy(view.model, 'trigger_event')
+      view.reset()
+      expect(spy_state.called).to.be.false
+      expect(spy_range.called).to.be.false
+      expect(spy_selection.called).to.be.false
+      expect(spy_event.called).to.be.true
+    })
 
     it("layout should set element style correctly", () => {
       const view = new_plot_view({width: 425, height: 658})
@@ -116,19 +116,6 @@ describe("lib.models.plots.plot", () => {
         expect(view.is_paused).to.be.true
         view.unpause()
         expect(view.is_paused).to.be.false
-      })
-    })
-
-    describe("PlotView.get_canvas_element()", () => {
-
-      it("should exist because get_canvas_element depends on it", () => {
-        const view = new_plot_view()
-        expect(view.canvas_view.ctx).to.exist
-      })
-
-      it("should exist to grab the canvas DOM element using canvas_view.ctx", () => {
-        const view = new_plot_view()
-        expect(view.canvas_view.get_canvas_element).to.exist
       })
     })
   })

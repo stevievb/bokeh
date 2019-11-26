@@ -134,14 +134,17 @@ export class DataTableView extends WidgetView {
 
     // This is obnoxious but there is no better way to programmatically force
     // a re-sort on the existing sorted columns until/if we start using DataView
-    const columns = this.grid.getColumns()
-    const sorters = this.grid.getSortColumns().map((x: any) => ({
-      sortCol: {
-        field: columns[this.grid.getColumnIndex(x.columnId)].field,
-      },
-      sortAsc: x.sortAsc,
-    }))
-    this.data.sort(sorters)
+    if (this.model.sortable) {
+      const columns = this.grid.getColumns()
+      const sorters = this.grid.getSortColumns().map((x) => ({
+        sortCol: {
+          field: columns[this.grid.getColumnIndex(x.columnId)].field,
+        },
+        sortAsc: x.sortAsc,
+      }))
+
+      this.data.sort(sorters)
+    }
 
     this.grid.invalidate()
     this.grid.render()
@@ -236,6 +239,8 @@ export class DataTableView extends WidgetView {
     this.grid = new SlickGrid(this.el, this.data, columns, options)
 
     this.grid.onSort.subscribe((_event: any, args: any) => {
+      if (!this.model.sortable)
+        return
       columns = args.sortCols
       this.data.sort(columns)
       this.grid.invalidate()
@@ -245,7 +250,7 @@ export class DataTableView extends WidgetView {
         this._hide_header()
       }
       this.model.update_sort_columns(columns)
-   })
+    })
 
     if (this.model.selectable !== false) {
       this.grid.setSelectionModel(new RowSelectionModel({selectActiveRow: checkboxSelector == null}))
@@ -321,7 +326,7 @@ export class DataTable extends TableWidget {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_DataTable(): void {
     this.prototype.default_view = DataTableView
 
     this.define<DataTable.Props>({
@@ -346,7 +351,7 @@ export class DataTable extends TableWidget {
   }
 
   update_sort_columns(sortCols: any): null {
-    this._sort_columns=sortCols.map((x:any) => ({field:x.sortCol.field,sortAsc:x.sortAsc}))
+    this._sort_columns=sortCols.map((x: any) => ({field:x.sortCol.field, sortAsc:x.sortAsc}))
     return null
   }
 
@@ -361,4 +366,3 @@ export class DataTable extends TableWidget {
     return null
   }
 }
-DataTable.initClass()

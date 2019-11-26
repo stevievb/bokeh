@@ -126,6 +126,7 @@ export class GlyphRendererView extends DataRendererView {
       this.connect(this.model.data_source.inspect, () => this.request_render())
     this.connect(this.model.properties.view.change, () => this.set_data())
     this.connect(this.model.view.change, () => this.set_data())
+    this.connect(this.model.properties.visible.change, () => this.plot_view.update_dataranges())
 
     const {x_ranges, y_ranges} = this.plot_view.frame
 
@@ -235,12 +236,12 @@ export class GlyphRendererView extends DataRendererView {
       if (!inspected || inspected.is_empty())
         return []
       else {
-        if (inspected['0d'].glyph)
+        if (inspected.selected_glyph)
           return this.model.view.convert_indices_from_subset(indices)
-        else if (inspected['1d'].indices.length > 0)
-          return inspected['1d'].indices
+        else if (inspected.indices.length > 0)
+          return inspected.indices
         else
-          return map(Object.keys(inspected["2d"].indices), (i) => parseInt(i))
+          return map(Object.keys(inspected.multiline_indices), (i) => parseInt(i))
       }
     })())
 
@@ -393,7 +394,7 @@ export class GlyphRenderer extends DataRenderer {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_GlyphRenderer(): void {
     this.prototype.default_view = GlyphRendererView
 
     this.define<GlyphRenderer.Props>({
@@ -434,4 +435,3 @@ export class GlyphRenderer extends DataRenderer {
     return this.data_source.selection_manager
   }
 }
-GlyphRenderer.initClass()

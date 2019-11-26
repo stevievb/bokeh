@@ -47,7 +47,7 @@ describe("enums module", () => {
   it("should have HatchPatternType", () => {
     expect(enums.HatchPatternType).to.be.deep.equal([
       'blank', 'dot', 'ring', 'horizontal_line', 'vertical_line', 'cross', 'horizontal_dash',
-      'vertical_dash', 'spiral' , 'right_diagonal_line', 'left_diagonal_line', 'diagonal_cross',
+      'vertical_dash', 'spiral', 'right_diagonal_line', 'left_diagonal_line', 'diagonal_cross',
       'right_diagonal_dash', 'left_diagonal_dash', 'horizontal_wave', 'vertical_wave', 'criss_cross',
       ' ', '.', 'o', '-', '|', '+', '"', ':', '@', '/', '\\', 'x', ',', '`', 'v', '>', '*',
     ])
@@ -155,10 +155,6 @@ describe("enums module", () => {
 
   it("should have SizingMode", () => {
     expect(enums.SizingMode).to.be.deep.equal(["stretch_width", "stretch_height", "stretch_both", "scale_width", "scale_height", "scale_both", "fixed"])
-  })
-
-  it("should have SliedrCallbackPolicy", () => {
-    expect(enums.SliderCallbackPolicy).to.be.deep.equal(["continuous", "throttle", "mouseup"])
   })
 
   it("should have Sort", () => {

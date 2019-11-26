@@ -8,18 +8,21 @@
 ''' Bokeh build and upload script for TravisCI release builds
 
 '''
+# Standard library imports
 import argparse
-from collections import defaultdict
 import glob
-from io import BytesIO
 import os
-from packaging.version import Version as V
 import re
-from subprocess import Popen, PIPE
 import sys
+from collections import defaultdict
+from io import BytesIO
+from subprocess import PIPE, Popen
 
+# External imports
 import boto
-import boto.s3.connection, boto.s3.key
+import boto.s3.connection
+import boto.s3.key
+from packaging.version import Version as V
 
 try:
     import colorama
@@ -349,14 +352,6 @@ def upload_cdn(buckets):
             for bucket in buckets:
                 cdn_upload(local_path, cdn_path, content_type, bucket)
 
-    content_type = "text/css"
-    for name in ('bokeh', 'bokeh-widgets', 'bokeh-tables'):
-        for suffix in ('css', 'min.css'):
-            local_path = 'bokehjs/build/css/%s.%s' % (name, suffix)
-            cdn_path = 'bokeh/%s/%s-%s.%s' % (subdir, name, version, suffix)
-            for bucket in buckets:
-                cdn_upload(local_path, cdn_path, content_type, bucket)
-
 @upload_wrapper('anaconda')
 def upload_anaconda(token, dev):
     if dev:
@@ -374,7 +369,7 @@ def upload_anaconda(token, dev):
 
 @upload_wrapper('pypi')
 def upload_pypi(token):
-    cmd = "twine upload -u @token -p %s %s"
+    cmd = "twine upload -u __token__ -p %s %s"
     files = glob.glob("dist/bokeh*.tar.gz")
     for file in files:
         run(cmd % (token, file), fake_cmd=cmd % ("<hidden>", file))
@@ -382,11 +377,17 @@ def upload_pypi(token):
 @upload_wrapper('docs')
 def upload_docs():
     cd("sphinx")
+    sync_cmd = "aws s3 sync build/html s3://docs.bokeh.org/en/%s/ --acl bucket-owner-full-control --cache-control max-age=31536000,public"
+    invalidate_cmd = "aws cloudfront create-invalidation --distribution-id E2OC6Q27H5UQ63 --paths %s"
+
     if V(CONFIG.version).is_prerelease:
-        run("fab deploy:dev")
+        run(sync_cmd % "dev")
+        run(invalidate_cmd % '/en/dev*')
     else:
-        run("fab deploy:%s" % CONFIG.version)
-        run("fab latest:%s" % CONFIG.version)
+        run(sync_cmd % CONFIG.version)
+        run(sync_cmd % "latest")
+        paths = '/en/latest* /versions.json'
+        run(invalidate_cmd % paths)
     cd("..")
 
 @upload_wrapper('examples')

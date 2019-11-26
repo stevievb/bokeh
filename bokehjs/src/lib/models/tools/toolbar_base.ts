@@ -38,7 +38,7 @@ export class ToolbarViewModel extends Model {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_ToolbarViewModel(): void {
     this.define<ToolbarViewModel.Props>({
       _visible: [ p.Any,     null  ],
       autohide: [ p.Boolean, false ],
@@ -49,7 +49,6 @@ export class ToolbarViewModel extends Model {
     return (!this.autohide) ? true : (this._visible == null) ? false : this._visible
   }
 }
-ToolbarViewModel.initClass()
 
 export class ToolbarBaseView extends DOMView {
   model: ToolbarBase
@@ -112,7 +111,7 @@ export class ToolbarBaseView extends DOMView {
 
     if (this.model.logo != null) {
       const gray = this.model.logo === "grey" ? bk_grey : null
-      const logo = a({href: "https://bokeh.pydata.org/", target: "_blank", class: [bk_logo, bk_logo_small, gray]})
+      const logo = a({href: "https://bokeh.org/", target: "_blank", class: [bk_logo, bk_logo_small, gray]})
       this.el.appendChild(logo)
     }
 
@@ -155,6 +154,7 @@ export type GesturesMap = {
   tap:       { tools: GestureTool[], active: Tool | null },
   doubletap: { tools: GestureTool[], active: Tool | null },
   press:     { tools: GestureTool[], active: Tool | null },
+  pressup:   { tools: GestureTool[], active: Tool | null },
   rotate:    { tools: GestureTool[], active: Tool | null },
   move:      { tools: GestureTool[], active: Tool | null },
   multi:     { tools: GestureTool[], active: Tool | null },
@@ -187,6 +187,7 @@ function createGestureMap(): GesturesMap {
     tap:       { tools: [], active: null },
     doubletap: { tools: [], active: null },
     press:     { tools: [], active: null },
+    pressup:   { tools: [], active: null },
     rotate:    { tools: [], active: null },
     move:      { tools: [], active: null },
     multi:     { tools: [], active: null },
@@ -200,7 +201,7 @@ export class ToolbarBase extends Model {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_ToolbarBase(): void {
     this.prototype.default_view = ToolbarBaseView
 
     this.define<ToolbarBase.Props>({
@@ -227,7 +228,7 @@ export class ToolbarBase extends Model {
 
   protected _init_tools(): void {
     // The only purpose of this function is to avoid unnecessary property churning.
-    const tools_changed = function (old_tools: Tool[], new_tools: Tool[]) {
+    const tools_changed = function(old_tools: Tool[], new_tools: Tool[]) {
       if (old_tools.length != new_tools.length) {
         return true
       }
@@ -306,4 +307,3 @@ export class ToolbarBase extends Model {
     }
   }
 }
-ToolbarBase.initClass()

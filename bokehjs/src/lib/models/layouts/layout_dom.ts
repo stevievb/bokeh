@@ -80,10 +80,10 @@ export abstract class LayoutDOMView extends DOMView {
       p.width_policy, p.height_policy, p.sizing_mode,
       p.aspect_ratio,
       p.visible,
-      p.background,
     ], () => this.invalidate_layout())
 
     this.on_change([
+      p.background,
       p.css_classes,
     ], () => this.invalidate_render())
   }
@@ -266,8 +266,6 @@ export abstract class LayoutDOMView extends DOMView {
             width_policy = "max"
             height_policy = "max"
             break
-          default:
-            throw new Error("unreachable")
         }
       }
     }
@@ -399,7 +397,7 @@ export abstract class LayoutDOM extends Model {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_LayoutDOM(): void {
     this.define<LayoutDOM.Props>({
       width:         [ p.Number,     null         ],
       height:        [ p.Number,     null         ],
@@ -420,4 +418,3 @@ export abstract class LayoutDOM extends Model {
     })
   }
 }
-LayoutDOM.initClass()

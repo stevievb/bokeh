@@ -66,8 +66,7 @@ export abstract class FileInput extends Widget {
     super(attrs)
   }
 
-  static initClass(): void {
-    this.prototype.type = "FileInput"
+  static init_FileInput(): void {
     this.prototype.default_view = FileInputView
 
     this.define<FileInput.Props>({
@@ -78,5 +77,3 @@ export abstract class FileInput extends Widget {
     })
   }
 }
-
-FileInput.initClass()

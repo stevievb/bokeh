@@ -12,21 +12,12 @@ models for instances that match specified criteria.
 #-----------------------------------------------------------------------------
 # Boilerplate
 #-----------------------------------------------------------------------------
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import logging
+import logging # isort:skip
 log = logging.getLogger(__name__)
 
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
-
-# Standard library imports
-
-# External imports
-from six import string_types
-
-# Bokeh imports
 
 #-----------------------------------------------------------------------------
 # Globals and constants
@@ -159,7 +150,7 @@ def match(obj, selector, context=None):
     for key, val in selector.items():
 
         # test attributes
-        if isinstance(key, string_types):
+        if isinstance(key, str):
 
             # special case 'type'
             if key == "type":
@@ -171,7 +162,7 @@ def match(obj, selector, context=None):
 
             # special case 'tag'
             elif key == 'tags':
-                if isinstance(val, string_types):
+                if isinstance(val, str):
                     if val not in obj.tags: return False
                 else:
                     try:

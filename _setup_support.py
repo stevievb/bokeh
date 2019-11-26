@@ -1,12 +1,23 @@
+#-----------------------------------------------------------------------------
+# Copyright (c) 2012 - 2019, Anaconda, Inc., and Bokeh Contributors.
+# All rights reserved.
+#
+# The full license is in the file LICENSE.txt, distributed with this software.
+#-----------------------------------------------------------------------------
 '''
 
 '''
-from __future__ import print_function
-
+# Standard library imports
+import os
+import re
 import shutil
+import subprocess
+import sys
+import time
+from glob import glob
 from os.path import dirname, exists, join, realpath, relpath
-import os, re, subprocess, sys, time
 
+# Bokeh imports
 import versioneer
 
 # provide fallbacks for highlights in case colorama is not installed
@@ -27,10 +38,6 @@ except ImportError:
     def green(text) :  return text
     def yellow(text) : return text
 
-# some functions prompt for user input, handle input vs raw_input (py2 vs py3)
-if sys.version_info[0] < 3:
-    input = raw_input # NOQA
-
 # -----------------------------------------------------------------------------
 # Module global variables
 # -----------------------------------------------------------------------------
@@ -38,7 +45,6 @@ if sys.version_info[0] < 3:
 ROOT = dirname(realpath(__file__))
 BOKEHJSROOT = join(ROOT, 'bokehjs')
 BOKEHJSBUILD = join(BOKEHJSROOT, 'build')
-CSS = join(BOKEHJSBUILD, 'css')
 JS = join(BOKEHJSBUILD, 'js')
 SERVER = join(ROOT, 'bokeh/server')
 TSLIB = join(BOKEHJSROOT , 'node_modules/typescript/lib')
@@ -238,20 +244,6 @@ def get_version():
     '''
     return versioneer.get_version()
 
-def upgrade_npm():
-    # Workaround to upgrade ``npm`` since Read the Docs build environment have
-    # ``3.5.2`` and we need at least ``npm>=6.0``
-    os.system('cd ~ ; mkdir bin ; npm install npm')
-    os.environ['PATH'] = '/home/docs/node_modules/.bin/:{}'.format(os.environ.get('PATH'))
-    print('PATH: {}'.format(os.environ.get('PATH')))
-
-def set_env_to_build_bokehjs():
-    # TODO: this can be defined using Environment Variables on Read the Docs
-    # https://docs.readthedocs.io/en/latest/guides/environment-variables.html
-
-    # Tell Bokeh install script to always build the Javascript files
-    os.environ['BOKEH_BUILD_JS'] = '1'
-
 # -----------------------------------------------------------------------------
 # Helpers for operation in the bokehjs dir
 # -----------------------------------------------------------------------------
@@ -265,8 +257,7 @@ def jsbuild_prompt():
     '''
     print(BOKEHJS_BUILD_PROMPT)
     mapping = {"1": True, "2": False}
-    # Use an environment variable to avoid prompting to the user
-    value = os.environ.get("BOKEH_BUILD_JS", "2") or input("Choice? ")
+    value = input("Choice? ")
     while value not in mapping:
         print("Input '%s' not understood. Valid choices: 1, 2\n" % value)
         value = input("Choice? ")
@@ -277,8 +268,7 @@ def jsbuild_prompt():
 # -----------------------------------------------------------------------------
 
 def build_js():
-    ''' Build BokehJS files (CSS, JS, etc) under the ``bokehjs`` source
-    subdirectory.
+    ''' Build BokehJS files under the ``bokehjs`` source subdirectory.
 
     Also prints a table of statistics about the generated assets (file sizes,
     etc.) or any error messages if the build fails.
@@ -354,14 +344,11 @@ def install_js():
 
     '''
     target_jsdir = join(SERVER, 'static', 'js')
-    target_cssdir = join(SERVER, 'static', 'css')
     target_tslibdir = join(SERVER, 'static', 'lib')
 
     STATIC_ASSETS = [
         join(JS,  'bokeh.js'),
         join(JS,  'bokeh.min.js'),
-        join(CSS, 'bokeh.css'),
-        join(CSS, 'bokeh.min.css'),
     ]
     if not all(exists(a) for a in STATIC_ASSETS):
         print(BOKEHJS_INSTALL_FAIL)
@@ -371,23 +358,12 @@ def install_js():
         shutil.rmtree(target_jsdir)
     shutil.copytree(JS, target_jsdir)
 
-    if exists(target_cssdir):
-        shutil.rmtree(target_cssdir)
-    shutil.copytree(CSS, target_cssdir)
-
     if exists(target_tslibdir):
         shutil.rmtree(target_tslibdir)
     if exists(TSLIB):
-        # keep in sync with bokehjs/src/compiler/compile.ts
-        lib = {
-            "lib.es5.d.ts",
-            "lib.dom.d.ts",
-            "lib.es2015.core.d.ts",
-            "lib.es2015.promise.d.ts",
-            "lib.es2015.symbol.d.ts",
-            "lib.es2015.iterable.d.ts",
-        }
-        shutil.copytree(TSLIB, target_tslibdir, ignore=lambda _, files: [ f for f in files if f not in lib ])
+        os.mkdir(target_tslibdir)
+        for lib_file in glob(join(TSLIB, "lib.*.d.ts")):
+            shutil.copy(lib_file, target_tslibdir)
 
 # -----------------------------------------------------------------------------
 # Helpers for collecting package data
@@ -433,7 +409,7 @@ ERROR: Cannot install BokehJS: files missing in `./bokehjs/build`.
 
 
 Please build BokehJS by running setup.py with the `--build-js` option.
-  Dev Guide: https://bokeh.pydata.org/docs/dev_guide.html#bokehjs.
+  Dev Guide: https://docs.bokeh.org/en/latest/docs/dev_guide/setup.html.
 """
 
 BUILD_EXEC_FAIL_MSG = bright(red("Failed.")) + """
@@ -442,10 +418,10 @@ ERROR: subprocess.Popen(%r) failed to execute:
 
     %s
 
-Have you run `npm install --no-save` from the bokehjs subdirectory?
+Have you run `npm ci` from the bokehjs subdirectory?
 For more information, see the Dev Guide:
 
-    https://bokeh.pydata.org/en/latest/docs/dev_guide.html
+    https://docs.bokeh.org/en/latest/docs/dev_guide.html
 """
 
 BUILD_FAIL_MSG = bright(red("Failed.")) + """

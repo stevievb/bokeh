@@ -25,8 +25,11 @@ export class GraphRendererView extends DataRendererView {
     this.yscale = this.plot_view.frame.yscales.default
 
     this._renderer_views = {}
-    ;[this.node_view, this.edge_view] = build_views(this._renderer_views,
-      [this.model.node_renderer, this.model.edge_renderer], {parent: this.parent}) as [GlyphRendererView, GlyphRendererView]
+
+    ;[this.node_view, this.edge_view] = build_views(this._renderer_views, [
+      this.model.node_renderer,
+      this.model.edge_renderer,
+    ], {parent: this.parent}) as [GlyphRendererView, GlyphRendererView]
 
     this.set_data()
   }
@@ -104,7 +107,7 @@ export class GraphRenderer extends DataRenderer {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_GraphRenderer(): void {
     this.prototype.default_view = GraphRendererView
 
     this.define<GraphRenderer.Props>({
@@ -120,4 +123,3 @@ export class GraphRenderer extends DataRenderer {
     return this.node_renderer.data_source.selection_manager
   }
 }
-GraphRenderer.initClass()

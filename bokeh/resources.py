@@ -19,9 +19,7 @@ Attributes:
 #-----------------------------------------------------------------------------
 # Boilerplate
 #-----------------------------------------------------------------------------
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import logging
+import logging # isort:skip
 log = logging.getLogger(__name__)
 
 #-----------------------------------------------------------------------------
@@ -29,19 +27,15 @@ log = logging.getLogger(__name__)
 #-----------------------------------------------------------------------------
 
 # Standard library imports
-import re
 import json
+import re
 from os.path import basename, join, relpath
-
-# External imports
-from six import string_types
 
 # Bokeh imports
 from . import __version__
-from .core.templates import JS_RESOURCES, CSS_RESOURCES
+from .core.templates import CSS_RESOURCES, JS_RESOURCES
 from .model import Model
 from .settings import settings
-
 from .util.paths import bokehjsdir
 from .util.session_id import generate_session_id
 
@@ -53,11 +47,11 @@ DEFAULT_SERVER_HOST = "localhost"
 DEFAULT_SERVER_PORT = 5006
 DEFAULT_SERVER_HTTP_URL = "http://%s:%d/" % (DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT)
 
+# __all__ defined at the bottom on the class module
+
 #-----------------------------------------------------------------------------
 # General API
 #-----------------------------------------------------------------------------
-
-# __all__ defined at the bottom on the class module
 
 #-----------------------------------------------------------------------------
 # Dev API
@@ -67,9 +61,9 @@ class BaseResources(object):
     _default_root_dir = "."
     _default_root_url = DEFAULT_SERVER_HTTP_URL
 
-    def __init__(self, mode='inline', version=None, root_dir=None,
-                 minified=True, log_level="info", root_url=None,
-                 path_versioner=None, components=None):
+    def __init__(self, mode=None, version=None, root_dir=None,
+                 minified=None, log_level=None, root_url=None,
+                 path_versioner=None, components=None, base_dir=None):
 
         self._components = components
 
@@ -115,6 +109,8 @@ class BaseResources(object):
             server = self._server_urls()
             self.messages.extend(server['messages'])
 
+        self.base_dir = base_dir or bokehjsdir(self.dev)
+
     # Properties --------------------------------------------------------------
 
     @property
@@ -146,10 +142,9 @@ class BaseResources(object):
         return components
 
     def _file_paths(self, kind):
-        bokehjs_dir = bokehjsdir(self.dev)
         minified = ".min" if not self.dev and self.minified else ""
         files = [ "%s%s.%s" % (component, minified, kind) for component in self.components(kind) ]
-        paths = [ join(bokehjs_dir, kind, file) for file in files ]
+        paths = [ join(self.base_dir, kind, file) for file in files ]
         return paths
 
     def _collect_external_resources(self, resource_attr):
@@ -160,7 +155,7 @@ class BaseResources(object):
         for _, cls in sorted(Model.model_class_reverse_map.items(), key=lambda arg: arg[0]):
             external = getattr(cls, resource_attr, None)
 
-            if isinstance(external, string_types):
+            if isinstance(external, str):
                 if external not in external_resources:
                     external_resources.append(external)
             elif isinstance(external, list):
@@ -196,7 +191,8 @@ class BaseResources(object):
 
         return (files, raw)
 
-    def _inline(self, path):
+    @staticmethod
+    def _inline(path):
         begin = "/* BEGIN %s */" % basename(path)
         with open(path, 'rb') as f:
             middle = f.read().decode("utf-8")
@@ -227,14 +223,14 @@ class JSResources(BaseResources):
             be generated.
 
             ``root_url`` can also be the empty string, in which case relative URLs,
-            e.g., "static/css/bokeh.min.js", are generated.
+            e.g., "static/js/bokeh.min.js", are generated.
 
             Only valid with ``'server'`` and ``'server-dev'`` modes
 
     The following **mode** values are available for configuring a Resource object:
 
     * ``'inline'`` configure to provide entire Bokeh JS and CSS inline
-    * ``'cdn'`` configure to load Bokeh JS and CSS from ``http://cdn.pydata.org``
+    * ``'cdn'`` configure to load Bokeh JS and CSS from ``https://cdn.bokeh.org``
     * ``'server'`` configure to load from a Bokeh Server
     * ``'server-dev'`` same as ``server`` but supports non-minified assets
     * ``'relative'`` configure to load relative to the given directory
@@ -306,7 +302,7 @@ class CSSResources(BaseResources):
     The following **mode** values are available for configuring a Resource object:
 
     * ``'inline'`` configure to provide entire BokehJS code and CSS inline
-    * ``'cdn'`` configure to load Bokeh CSS from ``http://cdn.pydata.org``
+    * ``'cdn'`` configure to load Bokeh CSS from ``https://cdn.bokeh.org``
     * ``'server'`` configure to load from a Bokeh Server
     * ``'server-dev'`` same as ``server`` but supports non-minified CSS
     * ``'relative'`` configure to load relative to the given directory
@@ -375,7 +371,7 @@ class Resources(JSResources, CSSResources):
     The following **mode** values are available for configuring a Resource object:
 
     * ``'inline'`` configure to provide entire Bokeh JS and CSS inline
-    * ``'cdn'`` configure to load Bokeh JS and CSS from ``http://cdn.pydata.org``
+    * ``'cdn'`` configure to load Bokeh JS and CSS from ``https://cdn.bokeh.org``
     * ``'server'`` configure to load from a Bokeh Server
     * ``'server-dev'`` same as ``server`` but supports non-minified assets
     * ``'relative'`` configure to load relative to the given directory
@@ -450,7 +446,7 @@ class _SessionCoordinates(object):
 _DEV_PAT = re.compile(r"^(\d)+\.(\d)+\.(\d)+(dev|rc)")
 
 def _cdn_base_url():
-    return "https://cdn.pydata.org"
+    return "https://cdn.bokeh.org"
 
 
 def _get_cdn_urls(version=None, minified=True):

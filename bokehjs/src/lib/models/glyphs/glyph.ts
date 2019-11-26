@@ -51,9 +51,9 @@ export abstract class GlyphView extends View {
     // and not done if it isn't ever set, but for now it only
     // matters in the unit tests because we build a view without a
     // renderer there)
-    const {gl} = this.renderer.plot_view
+    const {webgl} = this.renderer.plot_view.canvas_view
 
-    if (gl != null) {
+    if (webgl != null) {
       let webgl_module = null
       try {
         webgl_module = require("./webgl/index")
@@ -67,7 +67,7 @@ export abstract class GlyphView extends View {
       if (webgl_module != null) {
         const Cls = webgl_module[this.model.type + 'GLGlyph']
         if (Cls != null)
-          this.glglyph = new Cls(gl.ctx, this)
+          this.glglyph = new Cls(webgl.gl, this)
       }
     }
   }
@@ -352,7 +352,7 @@ export abstract class Glyph extends Model {
     super(attrs)
   }
 
-  static initClass(): void {
+  static init_Glyph(): void {
     this.prototype._coords = []
 
     this.internal({
@@ -374,4 +374,3 @@ export abstract class Glyph extends Model {
     this.define<Glyph.Props>(result)
   }
 }
-Glyph.initClass()

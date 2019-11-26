@@ -11,7 +11,7 @@ class SomeModel extends Model {
   bar: string
   baz: number
 
-  static initClass(): void {
+  static init_SomeModel(): void {
     this.define<any>({
       foo: [ p.Number, 2 ],
       bar: [ p.String    ],
@@ -19,12 +19,11 @@ class SomeModel extends Model {
     })
   }
 }
-SomeModel.initClass()
 
 describe("Model objects", () => {
 
   describe("default creation", () => {
-    const m = new Model()
+    const m = new SomeModel()
 
     it("should have null name", () => {
       expect(m.name).to.be.null

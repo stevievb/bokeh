@@ -184,10 +184,10 @@ describe("properties module", () => {
       })
 
       it("should throw an Error otherwise", () => {
-       function fn(): void {
+        function fn(): void {
           const prop = new MyProperty(new SomeHasProps(spec_field_only), 'a')
           prop.value()
-       }
+        }
         expect(fn).to.throw(Error, "attempted to retrieve property value for property without value specification")
       })
     })
@@ -195,7 +195,7 @@ describe("properties module", () => {
     describe("array", () => {
 
       it("should return an array if there is a value spec", () => {
-        const source = new ColumnDataSource({data: {foo: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {foo: [0, 1, 2, 3, 10]}})
         const p1 = new DataSpecProperty(new SomeSpecHasProps(fixed), 'a')
         const arr1 = p1.array(source)
         expect(arr1).to.be.instanceof(Array)
@@ -218,7 +218,7 @@ describe("properties module", () => {
       })
 
       it("should return an array if there is a valid expr spec", () => {
-        const source = new ColumnDataSource({data: {foo: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {foo: [0, 1, 2, 3, 10]}})
         const prop = new DataSpecProperty(new SomeSpecHasProps(spec_expr), 'a')
         const arr = prop.array(source)
         expect(arr).to.be.instanceof(Array)
@@ -231,7 +231,7 @@ describe("properties module", () => {
       })
 
       it("should return an array if there is a valid field spec", () => {
-        const source = new ColumnDataSource({data: {foo: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {foo: [0, 1, 2, 3, 10]}})
         const prop = new DataSpecProperty(new SomeSpecHasProps(spec_field), 'a')
         const arr = prop.array(source)
         expect(arr).to.be.instanceof(Array)
@@ -244,7 +244,7 @@ describe("properties module", () => {
       })
 
       it("should return an array if there is a valid field spec named 'field'", () => {
-        const source = new ColumnDataSource({data: {field: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {field: [0, 1, 2, 3, 10]}})
         const prop = new DataSpecProperty(new SomeSpecHasProps({a: {field: 'field'}, b: 30}), 'a')
         const arr = prop.array(source)
         expect(arr).to.be.instanceof(Array)
@@ -266,7 +266,7 @@ describe("properties module", () => {
       })
 
       it("should apply a spec transform to a field", () => {
-        const source = new ColumnDataSource({data: {foo: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {foo: [0, 1, 2, 3, 10]}})
         const prop = new DataSpecProperty(new SomeSpecHasProps(spec_field_trans), 'a')
         const arr = prop.array(source)
         expect(arr).to.be.instanceof(Array)
@@ -279,7 +279,7 @@ describe("properties module", () => {
       })
 
       it("should apply a spec transform to a value array", () => {
-        const source = new ColumnDataSource({data: {foo: [0,1,2,3,10]}})
+        const source = new ColumnDataSource({data: {foo: [0, 1, 2, 3, 10]}})
         const prop = new DataSpecProperty(new SomeSpecHasProps(spec_value_trans), 'a')
         const arr = prop.array(source)
         expect(arr).to.be.instanceof(Array)
@@ -291,48 +291,48 @@ describe("properties module", () => {
         expect(arr[4]).to.be.equal(6)
       })
 
-    describe("init", () => {
-      it("should return nothing by default", () => {
-        const prop = new MyProperty(new SomeHasProps({a: {value: "foo"}}), 'a')
-        expect(prop.init()).to.be.undefined
-      })
-    })
-
-    describe("transform", () => {
-      it("should be the identity", () => {
-        expect(p.Property.prototype.transform(10)).to.be.equal(10)
-        expect(p.Property.prototype.transform("foo")).to.be.equal("foo")
-        expect(p.Property.prototype.transform(null)).to.be.null
+      describe("init", () => {
+        it("should return nothing by default", () => {
+          const prop = new MyProperty(new SomeHasProps({a: {value: "foo"}}), 'a')
+          expect(prop.init()).to.be.undefined
+        })
       })
 
-      it("should return the same type as passed", () => {
-        const r1 = p.Number.prototype.transform([10, 20, 30])
-        expect(r1).to.be.deep.equal([10, 20, 30])
-        const r2 = p.Number.prototype.transform(new Float64Array([10, 20, 30]))
-        expect(r2).to.be.deep.equal(new Float64Array([10, 20, 30]))
-      })
-    })
+      describe("transform", () => {
+        it("should be the identity", () => {
+          expect(p.Property.prototype.transform(10)).to.be.equal(10)
+          expect(p.Property.prototype.transform("foo")).to.be.equal("foo")
+          expect(p.Property.prototype.transform(null)).to.be.null
+        })
 
-    describe("validate", () => {
-      it("should return nothing by default", () => {
-        const prop = new MyProperty(new SomeHasProps({a: {value: "foo"}}), 'a')
-        expect(prop.validate(undefined)).to.be.undefined
-        expect(prop.validate(10)).to.be.undefined
-        expect(prop.validate("foo")).to.be.undefined
-        expect(prop.validate(null)).to.be.undefined
+        it("should return the same type as passed", () => {
+          const r1 = p.Number.prototype.transform([10, 20, 30])
+          expect(r1).to.be.deep.equal([10, 20, 30])
+          const r2 = p.Number.prototype.transform(new Float64Array([10, 20, 30]))
+          expect(r2).to.be.deep.equal(new Float64Array([10, 20, 30]))
+        })
       })
-    })
 
-    describe("changing the property attribute value", () => {
-      it("should trigger change on the property", () => {
-        const obj = new SomeHasProps({a: {value: "foo"}})
-        const prop = obj.properties.a
-        const stuff = {called: false}
-        prop.change.connect(function fn(): void { stuff.called = true})
-        obj.a = {value: "bar"}
-        expect(stuff.called).to.be.true
+      describe("validate", () => {
+        it("should return nothing by default", () => {
+          const prop = new MyProperty(new SomeHasProps({a: {value: "foo"}}), 'a')
+          expect(prop.validate(undefined)).to.be.undefined
+          expect(prop.validate(10)).to.be.undefined
+          expect(prop.validate("foo")).to.be.undefined
+          expect(prop.validate(null)).to.be.undefined
+        })
       })
-    })
+
+      describe("changing the property attribute value", () => {
+        it("should trigger change on the property", () => {
+          const obj = new SomeHasProps({a: {value: "foo"}})
+          const prop = obj.properties.a
+          const stuff = {called: false}
+          prop.change.connect(function fn(): void { stuff.called = true})
+          obj.a = {value: "bar"}
+          expect(stuff.called).to.be.true
+        })
+      })
 
       it("should update the spec", () => {
         const obj = new SomeHasProps({a: {value: "foo"}})
@@ -377,7 +377,7 @@ describe("properties module", () => {
 
     describe("validate", () => {
       it("should return undefined on any input", () => {
-        for (const x of [true, null, undefined, 10, 10.2, "foo", [1,2,3], {}, new SomeHasProps()])
+        for (const x of [true, null, undefined, 10, 10.2, "foo", [1, 2, 3], {}, new SomeHasProps()])
           expect(prop.validate(x)).to.be.undefined
       })
     })
@@ -423,8 +423,8 @@ describe("properties module", () => {
     describe("validate", () => {
       it("should return undefined on array input", () => {
         expect(prop.validate([])).to.be.undefined
-        expect(prop.validate([1,2,3])).to.be.undefined
-        expect(prop.validate(new Float64Array([1,2,3]))).to.be.undefined
+        expect(prop.validate([1, 2, 3])).to.be.undefined
+        expect(prop.validate(new Float64Array([1, 2, 3]))).to.be.undefined
       })
 
       it("should throw an Error on non-array input", () => {

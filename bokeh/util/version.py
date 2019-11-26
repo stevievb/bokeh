@@ -27,20 +27,15 @@ Functions:
 #-----------------------------------------------------------------------------
 # Boilerplate
 #-----------------------------------------------------------------------------
-from __future__ import absolute_import, division, print_function, unicode_literals
-
-import logging
+import logging # isort:skip
 log = logging.getLogger(__name__)
 
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
 
-# Standard library imports
-
-# External imports
-
 # Bokeh imports
+from .._version import get_versions
 
 #-----------------------------------------------------------------------------
 # Globals and constants
@@ -54,13 +49,15 @@ __all__ = (
 # General API
 #-----------------------------------------------------------------------------
 
-def base_version():
+def base_version() -> str:
     return _base_version_helper(__version__)
 
-def _base_version_helper(version):
+def _base_version_helper(version: str) -> str:
     import re
     VERSION_PAT = re.compile(r"^(\d+\.\d+\.\d+)((?:dev|rc).*)?")
-    return VERSION_PAT.search(version).group(1)
+    match = VERSION_PAT.search(version)
+    assert match is not None
+    return match.group(1)
 
 #-----------------------------------------------------------------------------
 # Dev API
@@ -74,6 +71,5 @@ def _base_version_helper(version):
 # Code
 #-----------------------------------------------------------------------------
 
-from .._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
