@@ -1,4 +1,5 @@
 import {Document, DocJson} from "../document"
+import {DOMView} from "../core/dom_view"
 import {logger} from "../core/logging"
 import {defer} from "../core/util/callback"
 import {unescape, uuid4} from "../core/util/string"
@@ -41,12 +42,12 @@ export function embed_item(item: JsonItem, target_id?: string) {
 // the first two args, whereas server provide the app_app, and *may* prove and
 // absolute_url as well if non-relative links are needed for resources. This function
 // should probably be split in to two pieces to reflect the different usage patterns
-export function embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): ClientSession[] {
+export function embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): Promise<{views: {[key: string]: DOMView}, session: ClientSession}>[] {
   //defer(() => _embed_items(docs_json, render_items, app_path, absolute_url))
   return _embed_items(docs_json, render_items, app_path, absolute_url)
 }
 
-function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): ClientSession[] {
+function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], app_path?: string, absolute_url?: string): Promise<{views: {[key: string]: DOMView}, session: ClientSession}>[] {
   if (isString(docs_json))
     docs_json = JSON.parse(unescape(docs_json)) as DocsJson
 
@@ -56,7 +57,7 @@ function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], 
     docs[docid] = Document.from_json(doc_json)
   }
 
-  const sessions: ClientSession[] = []
+  let promises: Promise<{views: {[key: string]: DOMView}, session: ClientSession}>[] = []
   for (const item of render_items) {
     const element = _resolve_element(item)
     const roots = _resolve_root_elements(item)
@@ -71,16 +72,16 @@ function _embed_items(docs_json: string | DocsJson, render_items: RenderItem[], 
       promise.then(
         (ref) => {
           console.log("Bokeh items were rendered successfully")
-          sessions.push(ref.session)
 
         },
         (error) => {
           console.log("Error rendering Bokeh items:", error)
         },
       )
+      promises.push(promise)
     } else
       throw new Error(`Error rendering Bokeh items: either 'docid' or 'sessionid' was expected.`)
   }
 
-  return sessions
+  return promises
 }
