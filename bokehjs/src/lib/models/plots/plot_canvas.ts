@@ -17,7 +17,7 @@ import {Reset} from "core/bokeh_events"
 import {Arrayable, Rect, Interval} from "core/types"
 import {Signal0} from "core/signaling"
 import {build_views, remove_views} from "core/build_views"
-import /*type*/ {UIEvents} from "core/ui_events"
+import {UIEvents} from "core/ui_events"
 import {Visuals} from "core/visuals"
 import {logger} from "core/logging"
 import {Side, RenderLevel} from "core/enums"
@@ -254,8 +254,6 @@ export class PlotView extends LayoutDOMView {
 
     this.throttled_paint = throttle((() => this.force_paint.emit()), 15)  // TODO (bev) configurable
 
-    // XXX: lazy value import to avoid touching window
-    const {UIEvents} = require("core/ui_events")
     this.ui_event_bus = new UIEvents(this, this.model.toolbar, this.canvas_view.events_el)
 
     const {title_location, title} = this.model
@@ -436,9 +434,10 @@ export class PlotView extends LayoutDOMView {
     const {webgl} = this.canvas_view
     if (webgl != null) {
       // Sync canvas size
-      const {width, height} = this.layout.bbox
-      webgl.canvas.width = width
-      webgl.canvas.height = height
+      const {width, height} = this.canvas_view.bbox
+      const {pixel_ratio} = this.canvas_view.model
+      webgl.canvas.width = pixel_ratio*width
+      webgl.canvas.height = pixel_ratio*height
       const {gl} = webgl
       // Clipping
       gl.enable(gl.SCISSOR_TEST)

@@ -59,6 +59,7 @@ test:
     - coverage
     - flake8
     - flaky
+    - ipython <=7.9.0
     - isort >=4.3.21
     - lxml
     - mock
@@ -75,7 +76,7 @@ test:
     - pytest-html
     - pytest-xdist
     - requests >=1.2.3
-    - selenium=3.8.0
+    - selenium >=3.8
     - scipy
 
     # examples
